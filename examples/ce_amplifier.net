@@ -1,0 +1,31 @@
+* Common-emitter amplifier example (demonstrates .subckt subcircuits)
+* Custom SPICE-style netlist. Comment lines start with '*'; inline comments follow ';'.
+
+.title Common-Emitter Amplifier
+
+* BJT model: NPN, simplified Ebers-Moll (IS = saturation current, BF = forward gain, BR = reverse gain)
+.model QNPN npn(bf=150 br=5 is=2e-15)
+
+* Subcircuit definition: common-emitter stage, port order is in out vcc gnd
+.subckt ceamp in out vcc gnd
+Cin  in   base  1u      ; input coupling capacitor
+R1   vcc  base  27k     ; upper bias resistor
+R2   base gnd   3.9k    ; lower bias resistor
+RC   vcc  col   2.2k    ; collector load resistor
+RE   em   gnd   820     ; emitter resistor (sets the operating point)
+CE   em   gnd   100u    ; emitter bypass capacitor (boosts AC gain)
+Cout col  out   1u      ; output coupling capacitor
+RL   out  gnd   10k     ; load resistor
+Q1   col  base  em  QNPN
+.ends
+
+* Top-level stimulus
+VCC  vcc  0  12
+Vin  in   0  sin(0 0.01 1k)      ; input: 1 kHz / 10 mV sine wave
+X1   in out vcc 0 ceamp          ; subcircuit instance (pin order matches ports)
+
+* Analysis directives
+.op
+.tran 1e-5 0.005                  ; step 10 us, stop 5 ms
+
+.end

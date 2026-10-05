@@ -1,0 +1,33 @@
+* Small-signal common-emitter amplifier (low frequency)
+* The BJT is replaced by its hybrid-pi small-signal equivalent, built from
+* a resistor (r_pi) and a voltage-controlled current source (VCCS, g_m * v_be).
+* This is the "controlled-source + resistor network" model of the transistor.
+
+.title Small-Signal Common-Emitter Amplifier (hybrid-pi model)
+
+* --- Hybrid-pi small-signal BJT subcircuit (low frequency) ---
+* r_pi : base-emitter input resistance
+* g_m  : transconductance; the VCCS current g_m * v_be flows from collector to emitter.
+*        (VCCS syntax: G <name> n+ n- nc+ nc- gm; current leaves n+ and enters n-)
+.subckt ssbjt base collector emitter
+Rpi base emitter 4k
+Gm  emitter collector base emitter 40m
+.ends
+
+* Input signal source: 1 kHz / 10 mV sine wave (small signal)
+Vin in 0 sin(0 0.01 1k)
+
+* In the small-signal equivalent the DC supply VCC becomes AC ground,
+* so the bias resistors now connect the base to ground.
+R1 in 0 27k
+R2 in 0 3.9k
+
+* Hybrid-pi BJT; the emitter is AC-grounded (fully bypassed by CE at mid-band).
+X1 in out 0 ssbjt
+
+* Collector load and load resistor; their VCC end is AC-ground.
+RC out 0 2.2k
+RL out 0 10k
+
+.tran 1e-5 0.005
+.end
